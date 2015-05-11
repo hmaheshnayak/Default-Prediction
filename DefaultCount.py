@@ -19,7 +19,7 @@ with con:
         allLoansPaymentDates = cursor.fetchall()
 
         paymentYears = list(map(lambda x: str(x[0])[:4], allLoansPaymentDates))
-        cldsValues = list(map(lambda x: str(x[1])[:4], allLoansPaymentDates))
+        cldsValues = list(map(lambda x: str(x[1]), allLoansPaymentDates))
 
         uniquePaymentYears = set(paymentYears)
         #print(max(uniquePaymentYears))
