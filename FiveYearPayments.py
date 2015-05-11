@@ -13,6 +13,8 @@ with con:
     cursor.execute("SELECT loan_sequence_number from origination")
     sequenceNumbers = cursor.fetchall()
 	
+    is_paid_five_years = []
+	
     for sequenceNumber in sequenceNumbers:
         paymentDatesQuery = "SELECT monthly_reporting_period from monthly where loan_sequence_number = ?"
         cursor.execute(paymentDatesQuery, sequenceNumber)
@@ -23,13 +25,14 @@ with con:
         uniquePaymentYears = set(paymentYears)
 
 
-        is_paid_five_years = 'Y'
+        is_paid_flag = 'Y'
         length = len(uniquePaymentYears)
-        if length < 5:
-            is_paid_five_years = 'N'
-
-        updatePaymentInfoQuery = "UPDATE origination SET five_years_payment = '%s' WHERE loan_sequence_number = '%s'" % (is_paid_five_years, sequenceNumber[0])
-        cursor.execute(updatePaymentInfoQuery)
+        if length < 6:
+            is_paid_flag = 'N'
+        is_paid_five_years.append([is_paid_flag, sequenceNumber[0]])
+		
+    updatePaymentInfoQuery = "UPDATE OR REPLACE origination SET five_years_payment = ? WHERE loan_sequence_number = ?"
+    cursor.executemany(updatePaymentInfoQuery, is_paid_five_years)
 
 
 
