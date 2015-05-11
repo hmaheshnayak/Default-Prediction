@@ -36,6 +36,6 @@ with con:
 
         default_count.append([numDefaults, sequenceNumber[0]])
 
-    updateDefaultCountQuery = Query = "UPDATE origination SET default_count = ? WHERE loan_sequence_number = ?"
+    updateDefaultCountQuery = "UPDATE OR REPLACE origination SET default_count = ? WHERE loan_sequence_number = ?"
     cursor.executemany(updateDefaultCountQuery, default_count)
 

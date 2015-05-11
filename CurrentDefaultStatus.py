@@ -13,15 +13,24 @@ with con:
     default_status = []
 
     for sequenceNumber in sequenceNumbers:
-        cldsQuery = "SELECT clds from monthly where loan_sequence_number = ?"
+        paymentDatesQuery = "SELECT monthly_reporting_period, clds from monthly where loan_sequence_number = ?"
 
         cursor.execute(paymentDatesQuery, sequenceNumber)
         allLoansPaymentDates = cursor.fetchall()
 
-        currentclds = allLoansPaymentDates[len(allLoansPaymentDates)][0]
+        paymentYears = list(map(lambda x: str(x[0])[:4], allLoansPaymentDates))
+        cldsValues = list(map(lambda x: str(x[1]), allLoansPaymentDates))
 
+        uniquePaymentYears = set(paymentYears)
 
-        default_count.append([currentclds, sequenceNumber[0]])
+        #find last year payment was made and remove corresponding clds values
+        lastPaymentYear = max(uniquePaymentYears)
+        numPaymentsInLastYear = paymentYears.count(lastPaymentYear)
+        del cldsValues[-numPaymentsInLastYear:]
 
-    #updateDefaultStatusQuery = "UPDATE origination SET current_default_status = ? WHERE loan_sequence_number = ?"
-    #cursor.executemany(updateDefaultCountQuery, default_count)
+        #loan is default status if clds >= 3 on last payment date
+        currentStatus = 1 if int(cldsValues[-1]) >= 3 else 0
+        default_status.append([currentStatus, sequenceNumber[0]])
+
+    updateDefaultStatusQuery = "UPDATE OR REPLACE origination SET current_default_status = ? WHERE loan_sequence_number = ?"
+    cursor.executemany(updateDefaultStatusQuery, default_status)
