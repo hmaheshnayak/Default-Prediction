@@ -1,6 +1,6 @@
 import sqlite3 as lite
 
-con = lite.connect('D:\\Msc\\Neural Networks\\sampledb\\sample.db')
+con = lite.connect('D:\\Msc\\Neural Networks\\sampledbo\\sample.db')
 
 
 with con:
